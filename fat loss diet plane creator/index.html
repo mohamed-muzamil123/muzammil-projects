@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KetoKerala - Fat Loss Diet Creator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="grocery-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-container">
+
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <i class="fa-solid fa-leaf"></i>
+                <span>DietCreator</span>
+            </div>
+            <p class="tagline">Simple. Local. Effective.</p>
+        </header>
+
+        <!-- Main Form Section -->
+        <main id="input-section" class="card fade-in">
+            <h1>Create Your Fat Loss Plan</h1>
+            <p class="subtitle">Tell us a bit about yourself to get a personalized Kerala-style diet plan.</p>
+
+            <form id="diet-form">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" placeholder="e.g. 25" required min="10" max="100">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="weight">Weight (kg)</label>
+                        <input type="number" id="weight" placeholder="e.g. 75" required min="20" max="200">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="height">Height (cm)</label>
+                        <input type="number" id="height" placeholder="e.g. 175" required min="100" max="250">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" required>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label for="activity">Activity Level</label>
+                        <select id="activity" required>
+                            <option value="1.2">Sedentary (Little or no exercise)</option>
+                            <option value="1.375">Lightly Active (Light exercise 1-3 days/week)</option>
+                            <option value="1.55">Moderately Active (Moderate exercise 3-5 days/week)</option>
+                            <option value="1.725">Very Active (Hard exercise 6-7 days/week)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label for="preference">Food Preference</label>
+                        <div class="radio-group">
+                            <label class="radio-card">
+                                <input type="radio" name="preference" value="non-veg" checked>
+                                <span class="radio-content">
+                                    <i class="fa-solid fa-drumstick-bite"></i>
+                                    <span>Non-Veg</span>
+                                </span>
+                            </label>
+                            <label class="radio-card">
+                                <input type="radio" name="preference" value="veg">
+                                <span class="radio-content">
+                                    <i class="fa-solid fa-carrot"></i>
+                                    <span>Veg</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-area">
+                    <button type="submit" class="btn-primary">
+                        Generate Plan <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+        </main>
+
+        <!-- Result Section (Hidden initially) -->
+        <main id="result-section" class="hidden">
+            <div class="dashboard-grid">
+                <!-- Summary Card -->
+                <div class="card summary-card fade-in-up" style="animation-delay: 0.1s;">
+                    <h2>Your Daily Target</h2>
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <span class="stat-value" id="res-calories">0</span>
+                            <span class="stat-label">Calories</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="res-water">0L</span>
+                            <span class="stat-label">Water</span>
+                        </div>
+                    </div>
+                    <div class="bmi-badge" id="res-bmi-badge">BMI: <span id="res-bmi">0</span></div>
+                </div>
+
+                <!-- Plan Container -->
+                <div id="plan-container" class="plan-container">
+                    <!-- Days will be injected here -->
+                </div>
+            </div>
+
+            <div class="action-area fixed-bottom">
+                <button id="regenerate-btn" class="btn-secondary">
+                    <i class="fa-solid fa-rotate"></i> Regenerate
+                </button>
+                <button id="grocery-btn" class="btn-secondary">
+                    <i class="fa-solid fa-basket-shopping"></i> Shopping List
+                </button>
+                <button id="reset-btn" class="btn-outline">
+                    Start Over
+                </button>
+            </div>
+
+            <!-- Grocery List Modal/Overlay -->
+            <div id="grocery-modal" class="modal hidden">
+                <div class="modal-content card slide-up">
+                    <div class="modal-header">
+                        <h2>Weekly Essentials</h2>
+                        <button id="close-grocery" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div id="grocery-list-items" class="grocery-grid">
+                        <!-- Items injected here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
