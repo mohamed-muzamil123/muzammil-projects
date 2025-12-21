@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABCD Beauty Clinic | World Class Experience</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            100: '#F5E6C8',
+                            200: '#EAD2AC',
+                            400: '#D4AF37', // Classic Gold
+                            500: '#C5A059', // Muted Gold
+                            600: '#B08D55',
+                        },
+                        charcoal: {
+                            800: '#1F2937',
+                            900: '#111827',
+                            950: '#0B0F19', // Deeper black for Apple style
+                        },
+                        pearl: '#F9FAFB',
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        /* Core Aesthetics */
+        body {
+            background-color: #F9FAFB; /* Starts Pearl */
+            color: #1F2937;
+            /* Smooth bg transition for Dark Mode effect */
+            transition: background-color 0.8s cubic-bezier(0.25, 1, 0.5, 1); 
+        }
+        
+        /* Ultra-Premium Glass Navbar */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px); /* Apple-style heavy blur */
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+        }
+
+        /* Magnetic Button Base Style */
+        .magnetic-btn {
+            display: inline-flex;
+            position: relative;
+            z-index: 10;
+            will-change: transform;
+        }
+
+        /* Gradient Text */
+        .text-gradient-gold {
+            background: linear-gradient(135deg, #D4AF37 0%, #B08D55 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Mask Reveal Utility (Text rises from invisible floor) */
+        .reveal-container {
+            overflow: hidden;
+            display: block;
+        }
+        .reveal-text {
+            display: block;
+            transform: translateY(110%); /* Start hidden below */
+            will-change: transform;
+        }
+
+        /* Value Grid Card - Glassmorphism */
+        .value-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transition: transform 0.3s ease;
+        }
+
+        /* Hide scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0B0F19; }
+        ::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+    </style>
+</head>
+<body class="font-sans antialiased overflow-x-hidden selection:bg-gold-400 selection:text-white">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-nav transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center cursor-pointer magnetic-btn" onclick="window.scrollTo(0,0)">
+                    <span class="font-serif text-2xl font-bold tracking-wider text-charcoal-900">ABCD<span class="text-gold-400">.</span></span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#services" class="magnetic-btn text-charcoal-800 hover:text-gold-400 font-medium transition-colors text-sm tracking-wide">SERVICES</a>
+                    <a href="#specialists" class="magnetic-btn text-charcoal-800 hover:text-gold-400 font-medium transition-colors text-sm tracking-wide">EXPERTS</a>
+                    <a href="#reviews" class="magnetic-btn text-charcoal-800 hover:text-gold-400 font-medium transition-colors text-sm tracking-wide">REVIEWS</a>
+                    <!-- CTA -->
+                    <a href="#contact" class="magnetic-btn bg-charcoal-900 text-white px-7 py-3 rounded-full text-sm font-semibold tracking-wide hover:bg-gold-500 transition-colors duration-300 shadow-xl border border-transparent hover:border-gold-400/30">
+                        BOOK NOW
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-charcoal-800 hover:text-gold-400 focus:outline-none">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Panel -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white/95 backdrop-blur-xl border-t border-gray-100 absolute w-full z-40">
+            <div class="px-4 pt-2 pb-6 space-y-1 text-center">
+                <a href="#services" class="block px-3 py-3 text-base font-medium text-gray-700">Services</a>
+                <a href="#specialists" class="block px-3 py-3 text-base font-medium text-gray-700">Specialists</a>
+                <a href="#reviews" class="block px-3 py-3 text-base font-medium text-gray-700">Reviews</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Scrubbing Parallax -->
+    <header class="relative h-screen w-full flex items-center justify-center overflow-hidden">
+        <!-- Background Wrapper (Clipped for Zoom Effect) -->
+        <div class="absolute inset-0 z-0 overflow-hidden">
+            <img 
+                id="hero-bg"
+                src="https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80" 
+                alt="Luxury Salon Interior" 
+                class="w-full h-full object-cover origin-center transform scale-100 will-change-transform"
+            >
+            <!-- Gradient Overlay -->
+            <div class="absolute inset-0 bg-gradient-to-r from-pearl/90 via-pearl/70 to-transparent"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="relative z-10 max-w-7xl mx-auto px-4 text-center sm:text-left w-full h-full flex flex-col justify-center">
+            <div id="hero-content" class="sm:w-2/3 lg:w-1/2 translate-y-10 opacity-0">
+                <span class="inline-block py-1.5 px-4 rounded-full bg-white/80 backdrop-blur-sm text-gold-600 text-xs font-bold tracking-[0.2em] mb-6 border border-gold-400/20 shadow-sm uppercase">
+                    Kanhangad's Finest
+                </span>
+                
+                <h1 class="reveal-container mb-6">
+                    <span class="reveal-text font-serif text-5xl sm:text-6xl lg:text-7xl font-bold text-charcoal-900 leading-[1.1]">
+                        Redefining Beauty,
+                    </span>
+                    <span class="reveal-text font-serif text-5xl sm:text-6xl lg:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold-400 to-gold-600 italic leading-[1.1] py-2">
+                        Tailored for You.
+                    </span>
+                </h1>
+
+                <p class="text-gray-600 text-lg mb-10 leading-relaxed font-light max-w-lg">
+                    Experience a sanctuary where expert care meets relaxation. From bridal transformations to advanced skincare, discover your forever salon.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-5 justify-center sm:justify-start">
+                    <a href="#contact" class="magnetic-btn bg-charcoal-900 text-white px-9 py-4 rounded-full font-semibold hover:bg-gold-500 transition-all duration-300 shadow-2xl flex items-center justify-center gap-2 group">
+                        Book Appointment 
+                        <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                    <a href="#services" class="magnetic-btn border border-charcoal-900/20 text-charcoal-900 px-9 py-4 rounded-full font-semibold hover:bg-charcoal-900 hover:text-white transition-all duration-300 flex items-center justify-center backdrop-blur-sm">
+                        Explore Services
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 opacity-70">
+            <div class="w-[1px] h-16 bg-gradient-to-b from-charcoal-900 to-transparent"></div>
+        </div>
+    </header>
+
+    <!-- Why Choose Us -->
+    <section class="py-24 bg-transparent relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+                <!-- Feature 1 -->
+                <div class="feature-item p-6 group cursor-default">
+                    <div class="w-16 h-16 mx-auto bg-white shadow-lg rounded-full flex items-center justify-center text-gold-500 mb-6 group-hover:scale-110 transition-transform duration-500">
+                        <i data-lucide="star" class="w-7 h-7 fill-gold-100"></i>
+                    </div>
+                    <h3 class="font-serif text-xl font-bold mb-3 text-charcoal-900">4.6 Star Rated</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">Consistently top-rated by hundreds of happy clients across Kanhangad for our premium hospitality.</p>
+                </div>
+                <!-- Feature 2 -->
+                <div class="feature-item p-6 group cursor-default">
+                    <div class="w-16 h-16 mx-auto bg-white shadow-lg rounded-full flex items-center justify-center text-gold-500 mb-6 group-hover:scale-110 transition-transform duration-500">
+                        <i data-lucide="heart" class="w-7 h-7 fill-gold-100"></i>
+                    </div>
+                    <h3 class="font-serif text-xl font-bold mb-3 text-charcoal-900">Forever Home</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">More than a salon. A welcoming space where our staffs, treat you like family.</p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="feature-item p-6 group cursor-default">
+                    <div class="w-16 h-16 mx-auto bg-white shadow-lg rounded-full flex items-center justify-center text-gold-500 mb-6 group-hover:scale-110 transition-transform duration-500">
+                        <i data-lucide="sparkles" class="w-7 h-7 fill-gold-100"></i>
+                    </div>
+                    <h3 class="font-serif text-xl font-bold mb-3 text-charcoal-900">Expert Care</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">Advanced treatments for hair and skin delivered by certified professionals using premium products.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section (Light Theme) -->
+    <section id="services" class="py-32 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <div class="reveal-container inline-block">
+                    <h2 class="reveal-text font-serif text-4xl md:text-5xl font-bold text-charcoal-900 mb-4">Curated Services</h2>
+                </div>
+                <div class="w-24 h-[1px] bg-charcoal-200 mx-auto my-6"></div>
+                <p class="text-gray-500 max-w-xl mx-auto font-light">Precision cuts, revitalizing facials, and bridal makeovers designed to enhance your natural elegance.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <!-- Hair -->
+                <div class="service-card group cursor-pointer">
+                    <div class="h-[400px] rounded-2xl overflow-hidden relative shadow-md">
+                        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
+                        <img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Hair Service" class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110">
+                        
+                        <div class="absolute bottom-0 left-0 right-0 p-8 z-20 bg-gradient-to-t from-black/80 to-transparent">
+                            <h3 class="font-serif text-2xl font-bold text-white mb-2">Hair Smoothening</h3>
+                            <p class="text-white/80 text-sm mb-4 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">Silky, manageable perfection with premium treatments.</p>
+                            <span class="text-gold-400 text-xs font-bold tracking-widest uppercase border-b border-gold-400 pb-1">View Details</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Facial -->
+                <div class="service-card group cursor-pointer">
+                    <div class="h-[400px] rounded-2xl overflow-hidden relative shadow-md">
+                        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
+                        <img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Facial Service" class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110">
+                        
+                        <div class="absolute bottom-0 left-0 right-0 p-8 z-20 bg-gradient-to-t from-black/80 to-transparent">
+                            <h3 class="font-serif text-2xl font-bold text-white mb-2">Advanced Facials</h3>
+                            <p class="text-white/80 text-sm mb-4 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">Hydra-facials, anti-aging therapies, and deep cleansing.</p>
+                            <span class="text-gold-400 text-xs font-bold tracking-widest uppercase border-b border-gold-400 pb-1">View Details</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bridal -->
+                <div class="service-card group cursor-pointer">
+                    <div class="h-[400px] rounded-2xl overflow-hidden relative shadow-md">
+                        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
+                        <img src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Bridal Makeup" class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110">
+                        
+                        <div class="absolute bottom-0 left-0 right-0 p-8 z-20 bg-gradient-to-t from-black/80 to-transparent">
+                            <h3 class="font-serif text-2xl font-bold text-white mb-2">Bridal & Grooming</h3>
+                            <p class="text-white/80 text-sm mb-4 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">Complete pre-wedding packages for the bride and groom.</p>
+                            <span class="text-gold-400 text-xs font-bold tracking-widest uppercase border-b border-gold-400 pb-1">View Details</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Specialists Section (Dark Theme Transition Trigger) -->
+    <!-- The background color change is handled by GSAP ScrollTrigger targeting the body -->
+    <section id="specialists" class="py-32 relative z-10 overflow-hidden">
+        <!-- Abstract Background Elements -->
+        <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-gold-600/10 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-20">
+                
+                <!-- Text Side -->
+                <div class="lg:w-1/2">
+                    <span class="text-gold-500 font-bold tracking-[0.2em] text-xs mb-4 block uppercase opacity-80">The ABCD Standard</span>
+                    <div class="reveal-container">
+                        <h2 class="reveal-text font-serif text-5xl md:text-6xl font-bold mb-8 text-white leading-tight">
+                            The Hands Behind <br> 
+                            <span class="text-gold-400 italic">The Magic.</span>
+                        </h2>
+                    </div>
+                    <p class="text-gray-400 text-lg mb-10 leading-relaxed font-light">
+                        At ABCD, excellence is a habit. Our senior specialists, <strong class="text-white">Sandhya</strong> (Stylist) and <strong class="text-white">Soumya</strong> (Skin Expert), are celebrated not just for their technical precision, but for the warmth and patience they bring to every session.
+                    </p>
+                    
+                    <a href="#contact" class="magnetic-btn inline-flex text-white font-semibold border-b border-gold-500 pb-1 hover:text-gold-400 transition-colors">
+                        Meet the Full Team
+                    </a>
+                </div>
+
+                <!-- NEW: Luxury Value Grid (Replacing Static Image) -->
+                <div class="lg:w-1/2 w-full grid grid-cols-1 sm:grid-cols-2 gap-6 relative">
+                    <!-- Card 1 -->
+                    <div class="value-card p-8 rounded-3xl sm:translate-y-12 backdrop-blur-md bg-white/5 border border-white/10">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-white mb-6 shadow-lg shadow-gold-500/20">
+                            <i data-lucide="crown" class="w-6 h-6"></i>
+                        </div>
+                        <h4 class="text-white font-serif text-xl font-bold mb-2">Premium Standards</h4>
+                        <p class="text-gray-400 text-sm">We use only top-tier international products tailored to your specific skin and hair type.</p>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="value-card p-8 rounded-3xl backdrop-blur-md bg-white/5 border border-white/10">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-white mb-6 shadow-lg shadow-gold-500/20">
+                            <i data-lucide="sparkles" class="w-6 h-6"></i>
+                        </div>
+                        <h4 class="text-white font-serif text-xl font-bold mb-2">Hygiene First</h4>
+                        <p class="text-gray-400 text-sm">A clinically clean environment ensuring your safety and comfort at all times.</p>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="value-card p-8 rounded-3xl sm:translate-y-12 backdrop-blur-md bg-white/5 border border-white/10 col-span-1 sm:col-span-2 md:col-span-1 md:col-start-2">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-white mb-6 shadow-lg shadow-gold-500/20">
+                            <i data-lucide="heart" class="w-6 h-6"></i>
+                        </div>
+                        <h4 class="text-white font-serif text-xl font-bold mb-2">Personalized Care</h4>
+                        <p class="text-gray-400 text-sm">Every treatment begins with a detailed consultation to understand your unique needs.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof / Reviews (Back to Light via Body Transition) -->
+    <section id="reviews" class="py-32 bg-transparent relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <span class="text-gold-500 font-bold tracking-[0.2em] text-xs mb-4 block uppercase">Testimonials</span>
+                <div class="reveal-container inline-block">
+                    <h2 class="reveal-text font-serif text-4xl font-bold text-charcoal-900">Wall of Love</h2>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Review 1 -->
+                <div class="review-card bg-white p-10 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+                    <div class="flex text-gold-400 mb-6 gap-1">
+                        <i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                    </div>
+                    <p class="text-charcoal-800 mb-8 italic font-light text-lg">"The best salon in Kanhangad! The smoothening treatment changed my hair completely. Sandhya was so sweet and explained everything."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-charcoal-900 text-white rounded-full flex items-center justify-center font-serif font-bold">A</div>
+                        <div>
+                            <p class="font-bold text-sm text-charcoal-900">Anjali K.</p>
+                            <p class="text-xs text-gray-500">Hair Service</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Review 2 -->
+                <div class="review-card bg-white p-10 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+                    <div class="flex text-gold-400 mb-6 gap-1">
+                        <i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                    </div>
+                    <p class="text-charcoal-800 mb-8 italic font-light text-lg">"Very hygienic and professional. I did my bridal makeup here and everyone loved it. The ambience is very relaxing."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-charcoal-900 text-white rounded-full flex items-center justify-center font-serif font-bold">F</div>
+                        <div>
+                            <p class="font-bold text-sm text-charcoal-900">Fathima R.</p>
+                            <p class="text-xs text-gray-500">Bridal Package</p>
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- Review 3 -->
+                 <div class="review-card bg-white p-10 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+                    <div class="flex text-gold-400 mb-6 gap-1">
+                        <i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                    </div>
+                    <p class="text-charcoal-800 mb-8 italic font-light text-lg">"Excellent customer service. The staff is very friendly, especially Soumya. Highly recommend their facials."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-charcoal-900 text-white rounded-full flex items-center justify-center font-serif font-bold">R</div>
+                        <div>
+                            <p class="font-bold text-sm text-charcoal-900">Rahul M.</p>
+                            <p class="text-xs text-gray-500">Skin Care</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact & Map Footer -->
+    <footer id="contact" class="bg-charcoal-950 text-white pt-24 pb-12 border-t border-white/5 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
+                <!-- Contact Info -->
+                <div>
+                    <h2 class="font-serif text-4xl font-bold mb-6">Begin Your Journey.</h2>
+                    <p class="text-gray-400 mb-10 text-lg font-light">Your transformation awaits. Visit us for a consultation or book your slot today.</p>
+                    
+                    <div class="space-y-8">
+                        <div class="flex items-start gap-6 group">
+                            <div class="bg-charcoal-900 p-4 rounded-full text-gold-400 group-hover:scale-110 transition-transform">
+                                <i data-lucide="map-pin" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg mb-1">Location</h4>
+                                <p class="text-gray-400 font-light">Near 100HP Car Dealers,<br>Kanhangad, Kerala</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-6 group">
+                            <div class="bg-charcoal-900 p-4 rounded-full text-gold-400 group-hover:scale-110 transition-transform">
+                                <i data-lucide="phone" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg mb-1">Phone</h4>
+                                <a href="tel:+917012121125" class="text-gray-400 hover:text-white transition-colors font-light text-lg">+91 70121 21125</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Google Map Mockup -->
+                <div class="h-80 rounded-3xl overflow-hidden bg-gray-900 relative group border border-white/10">
+                    <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Map Location" class="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity duration-700">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <a href="https://maps.app.goo.gl/s4rwRj2DkyX5b4JY7?g_st=am" target="_blank" class="magnetic-btn bg-white text-charcoal-900 px-8 py-4 rounded-full font-bold shadow-2xl hover:scale-105 transition-transform flex items-center gap-3">
+                            <i data-lucide="navigation" class="w-4 h-4"></i> Open in Maps
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-white/5 mt-20 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
+                <p>&copy; 2024 ABCD Beauty Clinic. Crafted for Excellence.</p>
+                <div class="flex gap-8 mt-4 md:mt-0">
+                    <a href="#" class="hover:text-gold-400 transition-colors">Instagram</a>
+                    <a href="#" class="hover:text-gold-400 transition-colors">Facebook</a>
+                    <a href="#" class="hover:text-gold-400 transition-colors">WhatsApp</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- LOGIC -->
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Register GSAP ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger);
+
+        // --- 1. MAGNETIC BUTTONS (Apple Style) ---
+        // Calculates distance from center and pulls button slightly
+        const magneticBtns = document.querySelectorAll(".magnetic-btn");
+        
+        magneticBtns.forEach((btn) => {
+            btn.addEventListener("mousemove", (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                
+                // Move button slightly towards cursor (intensity 0.3)
+                gsap.to(btn, {
+                    x: x * 0.3,
+                    y: y * 0.3,
+                    duration: 0.3,
+                    ease: "power2.out"
+                });
+            });
+
+            btn.addEventListener("mouseleave", () => {
+                // Snap back to center
+                gsap.to(btn, {
+                    x: 0,
+                    y: 0,
+                    duration: 0.8,
+                    ease: "elastic.out(1, 0.3)"
+                });
+            });
+        });
+
+        // --- 2. HERO PARALLAX & ZOOM SCRUBBING ---
+        const tlHero = gsap.timeline({
+            scrollTrigger: {
+                trigger: "header",
+                start: "top top",
+                end: "bottom top",
+                scrub: true
+            }
+        });
+
+        // Image zooms IN as you scroll down
+        tlHero.to("#hero-bg", {
+            scale: 1.25, 
+            y: "10%", // Subtle vertical parallax
+            ease: "none"
+        }, 0);
+
+        // Text moves up faster (Parallax depth)
+        tlHero.to("#hero-content", {
+            y: "-50%",
+            opacity: 0,
+            ease: "none"
+        }, 0);
+
+
+        // --- 3. DYNAMIC BACKGROUND COLOR SHIFT ---
+        // Scroll into 'Specialists' -> Dark Mode
+        ScrollTrigger.create({
+            trigger: "#specialists",
+            start: "top 60%", 
+            end: "bottom 60%",
+            onEnter: () => gsap.to("body", { backgroundColor: "#111827", color: "#F9FAFB", duration: 0.8 }),
+            onLeave: () => gsap.to("body", { backgroundColor: "#F9FAFB", color: "#1F2937", duration: 0.8 }),
+            onEnterBack: () => gsap.to("body", { backgroundColor: "#111827", color: "#F9FAFB", duration: 0.8 }),
+            onLeaveBack: () => gsap.to("body", { backgroundColor: "#F9FAFB", color: "#1F2937", duration: 0.8 }),
+        });
+
+
+        // --- 4. MASK TEXT REVEAL ANIMATION ---
+        // Selects all .reveal-text elements and animates them up from their .reveal-container
+        const revealElements = document.querySelectorAll(".reveal-text");
+        
+        revealElements.forEach((text) => {
+            gsap.to(text, {
+                scrollTrigger: {
+                    trigger: text,
+                    start: "top 85%",
+                    toggleActions: "play none none reverse"
+                },
+                y: 0,
+                duration: 1.2,
+                ease: "power4.out"
+            });
+        });
+
+
+        // --- 5. FLOATING GRID REVEAL (Experts Section) ---
+        gsap.utils.toArray('.value-card').forEach((card, i) => {
+            gsap.from(card, {
+                scrollTrigger: {
+                    trigger: "#specialists",
+                    start: "top 70%",
+                },
+                y: 100,
+                opacity: 0,
+                duration: 1,
+                delay: i * 0.2, // Stagger effect
+                ease: "power3.out"
+            });
+        });
+
+        // --- 6. INITIAL LOAD ANIMATION ---
+        window.addEventListener("load", () => {
+            gsap.to("#hero-content", {
+                opacity: 1,
+                y: 0,
+                duration: 1.5,
+                ease: "power3.out",
+                delay: 0.2
+            });
+        });
+
+        // Mobile Menu Logic
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+        btn.addEventListener('click', () => menu.classList.toggle('hidden'));
+        menu.querySelectorAll('a').forEach(link => link.addEventListener('click', () => menu.classList.add('hidden')));
+
+    </script>
+</body>
+</html>
