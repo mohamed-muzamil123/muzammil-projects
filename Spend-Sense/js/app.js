@@ -20,11 +20,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const amount = parseFloat(document.getElementById('amount').value);
             const category = document.getElementById('selectedCategory').value;
+            const type = uiManager.currentType; // Access current type from UI Manager
 
             if (amount && category) {
                 expenseManager.addExpense({
                     amount,
                     category,
+                    type,
                     date: new Date().toISOString()
                 });
 
@@ -35,8 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelectorAll('.category-card').forEach(c => c.classList.remove('selected'));
                 document.getElementById('selectedCategory').value = '';
 
-                // Show success feedback (handled in UI Manager usually, but simple alert for now or custom toast)
-                console.log('Expense added!');
+                // Keep the type selection as is, or reset? Usually keep it.
             }
         });
     }

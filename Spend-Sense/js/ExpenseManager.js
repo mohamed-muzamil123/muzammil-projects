@@ -6,6 +6,10 @@ export default class ExpenseManager {
     }
 
     addExpense(expense) {
+        // expense object now expects: { amount, category, date, type: 'income' | 'expense' }
+        // Default to 'expense' if not provided for backward compatibility
+        if (!expense.type) expense.type = 'expense';
+
         this.expenses.unshift(expense); // Add to beginning
         this.storage.saveExpenses(this.expenses);
     }
@@ -19,18 +23,38 @@ export default class ExpenseManager {
         return this.expenses;
     }
 
+    getTotalExpense() {
+        return this.expenses
+            .filter(exp => exp.type === 'expense' || !exp.type)
+            .reduce((total, exp) => total + exp.amount, 0);
+    }
+
+    getTotalIncome() {
+        return this.expenses
+            .filter(exp => exp.type === 'income')
+            .reduce((total, exp) => total + exp.amount, 0);
+    }
+
+    getBalance() {
+        return this.getTotalIncome() - this.getTotalExpense();
+    }
+
+    // Keep this for backward compatibility if needed, or alias it
     getTotalSpent() {
-        return this.expenses.reduce((total, exp) => total + exp.amount, 0);
+        return this.getTotalExpense();
     }
 
     getCategoryBreakdown() {
         const breakdown = {};
-        this.expenses.forEach(exp => {
-            if (!breakdown[exp.category]) {
-                breakdown[exp.category] = 0;
-            }
-            breakdown[exp.category] += exp.amount;
-        });
+        // Only breakdown expenses for now
+        this.expenses
+            .filter(exp => exp.type === 'expense' || !exp.type)
+            .forEach(exp => {
+                if (!breakdown[exp.category]) {
+                    breakdown[exp.category] = 0;
+                }
+                breakdown[exp.category] += exp.amount;
+            });
         return breakdown;
     }
 
@@ -40,7 +64,7 @@ export default class ExpenseManager {
     }
 
     getBudgetStatus() {
-        const total = this.getTotalSpent();
+        const total = this.getTotalExpense();
         const percentage = (total / this.budgetLimit) * 100;
 
         if (percentage < 50) return 'safe';

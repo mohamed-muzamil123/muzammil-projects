@@ -14,48 +14,47 @@
 <body>
     <div class="app-container">
         <header class="glass-header">
-            <div class="logo">
-                <div class="logo-icon"></div>
-                <h1>Spend<span class="highlight">Sense</span></h1>
-            </div>
-            <div class="user-profile">
-                <div class="avatar"></div>
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon"></div>
+                    <h1>Spend<span class="highlight">Sense</span></h1>
+                </div>
+                <div class="balance-display">
+                    <span class="balance-label">Current Balance</span>
+                    <h2 class="balance-amount" id="currentBalance">$0.00</h2>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar"></div>
+                </div>
             </div>
         </header>
 
         <main class="dashboard-grid">
-            <!-- Visualization Section -->
-            <section class="visualizer-card glass-panel">
+            <!-- Summary Section -->
+            <section class="summary-card glass-panel">
                 <div class="card-header">
-                    <h2>Monthly Overview</h2>
+                    <h2>Monthly Summary</h2>
                     <span class="date-badge" id="currentMonth">December 2025</span>
                 </div>
-                <div class="chart-container">
-                    <div class="radial-progress-wrapper">
-                        <div class="radial-progress" id="mainProgress">
-                            <svg viewBox="0 0 200 200">
-                                <circle class="bg-ring" cx="100" cy="100" r="90"></circle>
-                                <circle class="progress-ring" id="progressRing" cx="100" cy="100" r="90"></circle>
-                            </svg>
-                            <div class="center-text">
-                                <span class="label">Spent</span>
-                                <span class="amount" id="totalSpent">$0</span>
-                                <div class="limit-wrapper">
-                                    <span class="limit" id="budgetLimit">of $2,000</span>
-                                    <button class="btn-icon-small" id="editBudgetBtn" title="Edit Budget">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2">
-                                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="status-message" id="statusMessage">
-                            <span class="status-icon">✨</span>
-                            <span class="status-text">You are doing great!</span>
-                        </div>
+                <div class="summary-stats">
+                    <div class="stat-item income">
+                        <span class="stat-label">Income</span>
+                        <span class="stat-value" id="totalIncome">$0.00</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item expense">
+                        <span class="stat-label">Expense</span>
+                        <span class="stat-value" id="totalExpense">$0.00</span>
+                    </div>
+                </div>
+                <div class="net-savings">
+                    <span class="label">Net Savings</span>
+                    <span class="value" id="netSavings">$0.00</span>
+                </div>
+                <div class="mini-chart">
+                    <div class="bar-chart">
+                        <div class="bar income-bar" id="incomeBar" style="width: 0%"></div>
+                        <div class="bar expense-bar" id="expenseBar" style="width: 0%"></div>
                     </div>
                 </div>
             </section>
@@ -63,7 +62,11 @@
             <!-- Input Section -->
             <section class="input-card glass-panel">
                 <div class="card-header">
-                    <h2>Add Expense</h2>
+                    <h2>Add Entry</h2>
+                    <div class="type-toggle">
+                        <button class="toggle-btn active" data-type="expense">Expense</button>
+                        <button class="toggle-btn" data-type="income">Income</button>
+                    </div>
                 </div>
                 <form id="expenseForm" class="expense-form">
                     <div class="input-group">
@@ -74,7 +77,7 @@
                         </div>
                     </div>
 
-                    <div class="input-group">
+                    <div class="input-group" id="categoryGroup">
                         <label>Category</label>
                         <div class="category-grid" id="categoryGrid">
                             <!-- Categories will be generated by JS -->
@@ -82,27 +85,17 @@
                         <input type="hidden" id="selectedCategory" required>
                     </div>
 
-                    <button type="submit" class="btn-primary">
+                    <button type="submit" class="btn-primary" id="submitBtn">
                         <span class="btn-text">Add Expense</span>
                         <div class="btn-glow"></div>
                     </button>
                 </form>
             </section>
 
-            <!-- Categories Breakdown -->
-            <section class="breakdown-card glass-panel">
-                <div class="card-header">
-                    <h2>Breakdown</h2>
-                </div>
-                <div class="category-list" id="categoryList">
-                    <!-- Category bars will be injected here -->
-                </div>
-            </section>
-
-            <!-- Recent Transactions -->
+            <!-- Daily Cashbook -->
             <section class="history-card glass-panel">
                 <div class="card-header">
-                    <h2>Recent</h2>
+                    <h2>Daily Cashbook</h2>
                     <button class="btn-icon" id="clearHistory" title="Clear History">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
@@ -111,10 +104,10 @@
                         </svg>
                     </button>
                 </div>
-                <div class="transaction-list" id="transactionList">
-                    <!-- Transactions will be injected here -->
+                <div class="timeline-container" id="transactionList">
+                    <!-- Timeline entries will be injected here -->
                     <div class="empty-state">
-                        <p>No expenses yet</p>
+                        <p>No entries yet</p>
                     </div>
                 </div>
             </section>
@@ -129,24 +122,6 @@
             <div class="modal-actions">
                 <button class="btn-secondary" id="cancelModal">Cancel</button>
                 <button class="btn-danger" id="confirmDelete">Delete Everything</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Budget Modal -->
-    <div class="modal-overlay" id="budgetModal">
-        <div class="glass-panel modal-content">
-            <h3>Set Monthly Budget</h3>
-            <p>Enter your target spending limit for the month.</p>
-            <div class="input-group">
-                <div class="amount-input-wrapper">
-                    <span class="currency">$</span>
-                    <input type="number" id="newBudgetInput" placeholder="2000" step="100">
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-secondary" id="cancelBudget">Cancel</button>
-                <button class="btn-primary" id="saveBudget">Save Limit</button>
             </div>
         </div>
     </div>

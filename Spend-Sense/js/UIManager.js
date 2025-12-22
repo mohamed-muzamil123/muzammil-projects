@@ -1,32 +1,70 @@
 export default class UIManager {
     constructor(expenseManager) {
         this.expenseManager = expenseManager;
-        this.categories = [
+        this.expenseCategories = [
             { id: 'food', name: 'Food', icon: '🍔', color: '#10b981' },
             { id: 'travel', name: 'Travel', icon: '✈️', color: '#3b82f6' },
             { id: 'shopping', name: 'Shopping', icon: '🛍️', color: '#8b5cf6' },
             { id: 'bills', name: 'Bills', icon: '📄', color: '#f59e0b' },
             { id: 'other', name: 'Other', icon: '✨', color: '#64748b' }
         ];
+        this.incomeCategories = [
+            { id: 'salary', name: 'Salary', icon: '💰', color: '#10b981' },
+            { id: 'freelance', name: 'Freelance', icon: '💻', color: '#3b82f6' },
+            { id: 'gift', name: 'Gift', icon: '🎁', color: '#8b5cf6' },
+            { id: 'other', name: 'Other', icon: '✨', color: '#64748b' }
+        ];
+        this.currentType = 'expense'; // 'expense' or 'income'
     }
 
     init() {
         this.renderCategorySelection();
-        this.setupBudgetModal();
+        this.setupTypeToggle();
         this.updateUI();
     }
 
     updateUI() {
-        this.updateRadialProgress();
+        this.renderSummaryCard();
+        this.renderBalance();
         this.renderTransactionList();
-        this.renderBreakdown();
+        // this.renderBreakdown(); // Optional: Removed from main view in new design, but could be added back if needed
+    }
+
+    setupTypeToggle() {
+        const toggles = document.querySelectorAll('.toggle-btn');
+        toggles.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.currentType = btn.dataset.type;
+
+                // Update UI State
+                toggles.forEach(t => t.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Update Form UI
+                const submitBtn = document.getElementById('submitBtn');
+                const submitText = submitBtn.querySelector('.btn-text');
+
+                if (this.currentType === 'income') {
+                    submitBtn.classList.add('btn-income');
+                    submitText.textContent = 'Add Income';
+                } else {
+                    submitBtn.classList.remove('btn-income');
+                    submitText.textContent = 'Add Expense';
+                }
+
+                // Refresh Categories
+                this.renderCategorySelection();
+            });
+        });
     }
 
     renderCategorySelection() {
         const grid = document.getElementById('categoryGrid');
         if (!grid) return;
 
-        grid.innerHTML = this.categories.map(cat => `
+        const categories = this.currentType === 'income' ? this.incomeCategories : this.expenseCategories;
+
+        grid.innerHTML = categories.map(cat => `
             <div class="category-card" data-id="${cat.id}">
                 <span class="category-icon">${cat.icon}</span>
                 <span class="category-name">${cat.name}</span>
@@ -52,76 +90,40 @@ export default class UIManager {
         if (input) input.value = id;
     }
 
-    updateRadialProgress() {
-        const total = this.expenseManager.getTotalSpent();
-        const limit = this.expenseManager.budgetLimit;
-        const percentage = Math.min((total / limit) * 100, 100);
-
-        // Update Text
-        document.getElementById('totalSpent').textContent = `$${total.toFixed(2)}`;
-        const limitEl = document.getElementById('budgetLimit');
-        if (limitEl) limitEl.textContent = `of $${limit.toLocaleString()}`;
-
-        // Update Ring
-        const circle = document.getElementById('progressRing');
-        if (circle) {
-            const radius = circle.r.baseVal.value;
-            const circumference = radius * 2 * Math.PI;
-            const offset = circumference - (percentage / 100) * circumference;
-            circle.style.strokeDashoffset = offset;
-
-            // Color Logic
-            const status = this.expenseManager.getBudgetStatus();
-            let color = '#10b981'; // safe
-            let message = 'You are doing great!';
-
-            if (status === 'warning') {
-                color = '#f59e0b';
-                message = 'Approaching budget limit.';
-            } else if (status === 'danger') {
-                color = '#ef4444';
-                message = 'Budget exceeded!';
-            }
-
-            circle.style.stroke = color;
-
-            const statusEl = document.getElementById('statusMessage');
-            if (statusEl) {
-                statusEl.querySelector('.status-text').textContent = message;
-                statusEl.style.color = color;
-            }
+    renderBalance() {
+        const balance = this.expenseManager.getBalance();
+        const balanceEl = document.getElementById('currentBalance');
+        if (balanceEl) {
+            balanceEl.textContent = `$${balance.toFixed(2)}`;
+            // Optional: Add color class based on positive/negative
+            if (balance < 0) balanceEl.classList.add('negative');
+            else balanceEl.classList.remove('negative');
         }
     }
 
-    setupBudgetModal() {
-        const modal = document.getElementById('budgetModal');
-        const editBtn = document.getElementById('editBudgetBtn');
-        const cancelBtn = document.getElementById('cancelBudget');
-        const saveBtn = document.getElementById('saveBudget');
-        const input = document.getElementById('newBudgetInput');
+    renderSummaryCard() {
+        const income = this.expenseManager.getTotalIncome();
+        const expense = this.expenseManager.getTotalExpense();
+        const net = income - expense;
 
-        if (!modal || !editBtn) return;
+        document.getElementById('totalIncome').textContent = `$${income.toFixed(2)}`;
+        document.getElementById('totalExpense').textContent = `$${expense.toFixed(2)}`;
 
-        const closeModal = () => modal.classList.remove('active');
+        const netEl = document.getElementById('netSavings');
+        netEl.textContent = `${net >= 0 ? '+' : ''}$${net.toFixed(2)}`;
+        netEl.className = `value ${net >= 0 ? 'positive' : 'negative'}`;
 
-        editBtn.addEventListener('click', () => {
-            input.value = this.expenseManager.budgetLimit;
-            modal.classList.add('active');
-        });
-
-        cancelBtn.addEventListener('click', closeModal);
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
-
-        saveBtn.addEventListener('click', () => {
-            const newBudget = parseFloat(input.value);
-            if (newBudget && newBudget > 0) {
-                this.expenseManager.setBudget(newBudget);
-                this.updateUI();
-                closeModal();
-            }
-        });
+        // Update Mini Chart
+        const total = income + expense;
+        if (total > 0) {
+            const incomePercent = (income / total) * 100;
+            const expensePercent = (expense / total) * 100;
+            document.getElementById('incomeBar').style.width = `${incomePercent}%`;
+            document.getElementById('expenseBar').style.width = `${expensePercent}%`;
+        } else {
+            document.getElementById('incomeBar').style.width = `0%`;
+            document.getElementById('expenseBar').style.width = `0%`;
+        }
     }
 
     renderTransactionList() {
@@ -129,52 +131,44 @@ export default class UIManager {
         const expenses = this.expenseManager.getExpenses();
 
         if (expenses.length === 0) {
-            list.innerHTML = '<div class="empty-state"><p>No expenses yet</p></div>';
+            list.innerHTML = '<div class="empty-state"><p>No entries yet</p></div>';
             return;
         }
 
-        list.innerHTML = expenses.map(exp => {
-            const cat = this.categories.find(c => c.id === exp.category) || this.categories[4];
-            return `
-                <div class="transaction-item">
-                    <div class="t-left">
-                        <div class="t-icon" style="background: ${cat.color}20; color: ${cat.color}">${cat.icon}</div>
-                        <div class="t-details">
-                            <span class="t-cat">${cat.name}</span>
-                            <span class="t-date">${new Date(exp.date).toLocaleDateString()}</span>
-                        </div>
-                    </div>
-                    <span class="t-amount">-$${exp.amount.toFixed(2)}</span>
+        // Group by Date
+        const grouped = expenses.reduce((acc, curr) => {
+            const date = new Date(curr.date).toLocaleDateString();
+            if (!acc[date]) acc[date] = [];
+            acc[date].push(curr);
+            return acc;
+        }, {});
+
+        list.innerHTML = Object.entries(grouped).map(([date, items]) => `
+            <div class="timeline-group">
+                <div class="timeline-date">${date}</div>
+                <div class="timeline-items">
+                    ${items.map(item => this.createTransactionItem(item)).join('')}
                 </div>
-            `;
-        }).join('');
+            </div>
+        `).join('');
     }
 
-    renderBreakdown() {
-        const list = document.getElementById('categoryList');
-        const breakdown = this.expenseManager.getCategoryBreakdown();
-        const total = this.expenseManager.getTotalSpent();
+    createTransactionItem(item) {
+        const isIncome = item.type === 'income';
+        const categories = isIncome ? this.incomeCategories : this.expenseCategories;
+        const cat = categories.find(c => c.id === item.category) || categories[categories.length - 1];
 
-        if (total === 0) {
-            list.innerHTML = '<div class="empty-state"><p>Add expenses to see breakdown</p></div>';
-            return;
-        }
-
-        list.innerHTML = Object.entries(breakdown).map(([catId, amount]) => {
-            const cat = this.categories.find(c => c.id === catId) || this.categories[4];
-            const percent = ((amount / total) * 100).toFixed(1);
-            return `
-                <div class="category-item">
-                    <div class="cat-info">
-                        <div class="cat-indicator" style="background: ${cat.color}"></div>
-                        <span>${cat.name}</span>
-                    </div>
-                    <div class="cat-stats">
-                        <strong>$${amount.toFixed(2)}</strong>
-                        <span style="font-size: 0.8rem; opacity: 0.7">(${percent}%)</span>
+        return `
+            <div class="transaction-item ${isIncome ? 'income-item' : 'expense-item'}">
+                <div class="t-left">
+                    <div class="t-icon" style="background: ${cat.color}20; color: ${cat.color}">${cat.icon}</div>
+                    <div class="t-details">
+                        <span class="t-cat">${cat.name}</span>
+                        <span class="t-time">${new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                 </div>
-            `;
-        }).join('');
+                <span class="t-amount">${isIncome ? '+' : '-'}$${item.amount.toFixed(2)}</span>
+            </div>
+        `;
     }
 }
